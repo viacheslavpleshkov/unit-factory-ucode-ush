@@ -10,6 +10,10 @@
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 
 #define MX_TMPDIR() (getenv("TMPDIR"))
@@ -34,44 +38,47 @@
 #define MX_HOMEBREW_CACHE() (getenv("HOMEBREW_CACHE"))
 #define MX_HOMEBREW_TEMP() (getenv("HOMEBREW_TEMP"))
 
+//Enum
 typedef enum e_error {
     ERR_EACCES,
     ERR_DIR,
 }            t_error;
 
+typedef enum e_branch {
+    RIGHT,
+    LEFT
+}            t_branch;
 
+//Struct
 typedef struct s_env {
-    char *tmpdir;
-    char *xpc_flags;
-    char *apple_pubsub;
-    char *term;
-    char *ssh_auth_sock;
-    char *seccuritySessionId;
-    char *xpc_service_name;
-    char *term_program;
-    char *term_program_version;
-    char *lc_ctype;
-    char *term_session_id;
-    char *shell;
-    char *home;
-    char *logname;
-    char *user;
-    char *path;
-    char *shlvl;
-    char *pwd; //менять в cd
-    char *oldpwd;
-    char *homebrew_cache;
-    char *homebrew_temp;
+    char *key;
+    char *value;
+    struct s_env *nect;
 }              t_env;
-
-typedef struct s_com {
+typedef struct s_process {
+    char **name;
+    pid_t pid;
+    int index;
+}              t_process;
+typedef struct s_main {
     char *command;
-    char **args;
-}              t_com;
+    t_env *env;
+    t_list *history;
+    wchar_t emodji_num;
+    int exit_status;
+}              t_main;
 
-
-//Pwd
-void pwd();
-//Cd
-void cd(char *arr);
+//Main
+t_main* mx_create_main();
+int main(void);
+//Builds function
+void pwd(void);
+void cd(char **input);
+void ls(char **args);
+//Input function
+char *mx_process_input(int *status);
+//Parsing function
+//
+void mx_print_prompt(wchar_t *emodji_num);
+//Validations function
 #endif

@@ -1,92 +1,53 @@
 #include "ush.h"
 
-static void foo(char **input) {
-    pid_t pid;
-    pid = fork();
-    if (pid != 0) {
-        if (strcmp(input[0], "cd") == 0)
-            cd(input);
-        if (strcmp(input[0], "exit") == 0)
-            exit(0);
-        wait(NULL);
+static void executing(t_ush *ush) {
+    t_queue **queue = NULL;
+
+    if (ush->command != NULL && strlen(ush->command) > 0) {
+        queue = mx_parsing(ush->command);
+        ush->return_value = mx_push_execute_queue(queue, ush);
     }
-    else {
-        if (strcmp(input[0], "pwd") == 0 || strcmp(input[0], "PWD") == 0)
-            pwd();
-        else if (strcmp(input[0], "ls") == 0 || strcmp(input[0], "LS") == 0)
-            ls(input);
-        exit(0);
-    }
+    mx_strdel(&ush->command);
+    free(queue);
 }
 
-static int winsize(void) {
-    struct winsize wins;
-    int err = ioctl(0, TIOCGWINSZ, &wins);
-
-    if (err == -1)
-        return 0;
-    return wins.ws_col;
-}
-
-static void check_str(char *str, int *status) {
-    int win_width = winsize();
-
-    if (mx_strlen(str) + 5 <= win_width) {
-        *status = 0;
-    }
-    else {
-        mx_print_error_basic("ush: shell deals only with one line user input\n");
-    }
-}
-
-static char **parse_input(char *str, int *status) {
-    char **input = NULL;
-
-    check_str(str, status);
-    if (mx_strchr(str, '\'') != NULL) {
-        *status = 2;
-        input = mx_strsplit(str, '\'');
-        //обработка 'command' , рекурсия ?
-    }
-    else if (mx_strchr(str, '|') != NULL) {
-        *status = 1;
-        input = mx_strsplit(str, '|');
-        //обработка pipe , рекурсия ?
-    }
-    else {
-        *status = 0;
-        input = mx_strsplit(str, ' ');
-        //обработка стандартного ввода
-    }
-    return input;
-}
-
-
-static void executing(int *status, char *str) {
-    char **input = NULL;
-
-    if (str != NULL && *status != 3) {
-        input = parse_input(str, status);
-        foo(input);
-        mx_free_void_arr((void **)input, mx_count_arr_el(input));
-    }
-}
-
-void sigint () {
-    //signal(SIGINT, sigint);
+static void sigint () {
     mx_printstr("\n");
 }
 
-int main(void) {
-    int status = 0;
-    //status 0 - normal; 1 - pipe; 2 - commsub; 3 - ^C break;
-    t_main *main = mx_create_main();
-    while(1) {
-        signal(SIGINT, sigint);
-        mx_print_prompt(&main->emodji_num);
-        main->command = mx_process_input(&status);
-        executing(&status, main->command);
-        mx_strdel(&main->command);
+static void set_shlvl(void) {
+    char *shlvl = mx_itoa(mx_atoi(MX_SHLVL()) + 1);
+
+    setenv("SHLVL", shlvl, 1);
+    mx_strdel(&shlvl);
+}
+
+static void argc_error(int argc, char **argv) {
+    if (argc > 1) {
+        fprintf(stderr, "ush: can't open input file: %s\n", argv[1]);
+        exit(127);
     }
-    return 0;
+}
+
+int main(int argc, char **argv){
+    t_ush *ush = NULL;
+
+    argc_error(argc, argv);
+    ush = mx_create_ush(argv);
+    set_shlvl();
+    while (1) {
+        signal(SIGINT, sigint);
+        signal(SIGTSTP, SIG_IGN);
+        ush->command = mx_process_input(ush);
+        executing(ush);
+        mx_strdel(&ush->command);
+        if (ush->exit_status != -1 || ush->exit_non_term == 1)
+            break;
+    }
+    mx_free_history(ush->history);
+    mx_strdel(&ush->ush_path);
+    free(ush);
+    if (ush->exit_status != -1)
+        exit(ush->exit_status);
+    return ush->return_value;
 }

@@ -11,5 +11,6 @@ void mx_print_strarr(char **arr, const char *delim) {
         mx_printstr(arr[i]);
         i++;
     }
-    mx_printstr("\n");
+    if (i > 0)
+        mx_printstr("\n");
 }

@@ -1,66 +1,83 @@
-#include <ush.h>
+#include "ush.h"
 
-static void set_non_canonic(struct termios *savetty) {
-    struct termios tty;
+static t_input *init_input() {
+    t_input *input = (t_input *)malloc(sizeof (t_input));
 
-    if ( !isatty(0) ) {
-        fprintf (stderr, "stdin not terminal\n");
-        exit (1);
-    }
-    tcgetattr (0, &tty);
-    *savetty = tty;
-    tty.c_lflag &= ~(ICANON|ISIG|ECHO);
-    tty.c_cc[VMIN] = 1;
-    tcsetattr (0, TCSAFLUSH, &tty);
+    input->len = 0;
+    input->command = mx_strnew(1000);//?
+    input->ctrl_c = 0;
+    input->coursor_position = 0;
+    input->input_ch = '\0';
+    input->input_ch_arr = (char *)&input->input_ch;
+    return input;
 }
 
-static void set_canonic(struct termios savetty) {
-    tcsetattr (STDIN_FILENO, TCSANOW, &savetty);
-}
 
-static char *read_str(char *str) {
-//    str = malloc(sizeof (char) * CHAR_MAX/8);
-//    size_t bufsize = CHAR_MAX/8;
-//    getline(&str, &bufsize, stdin);
-//    mx_printstr(str);
-    char ch;
-    int i = 0;
+static char *inside_cycle(t_input *input, int *flag, t_ush *ush, char *str) {
+    int k = 0;
+    int i = mx_getch(input);
 
-    while(1) {
-        read(0, &ch, 1);
-        if  (ch == 4) {
-            mx_printchar('\n');
-            exit(0);
-        }
-        else if  (ch == 3) {
-           // *status = 3;
-            mx_printchar('\n');
-            break;
-        }
-        else {
-            mx_printchar(ch);
-            if(ch != '\n') {
-                str = mx_realloc(str, sizeof(char) * (i + 2));
-                str[i] = ch;
-                i++;
-            }
-            else
+    while (k < i) {
+        input->input_ch = input->input_ch_arr[k];
+        if (input->input_ch <= 127 && input->input_ch != 27) {
+            str = mx_input_ascii(input, ush);
+            if (ush->exit_status != -1)
                 break;
         }
+        else {
+            *flag = 0;
+            mx_input_non_ascii(input, ush);
+        }
+        if (input->input_ch < 32)
+            break;
+        k++;
     }
-    if (str != NULL)
-        str[i] = '\0';
-       return str;
+    return str;
 }
 
-char *mx_process_input(int *status) {// сделать обработку \ и enter перенос строки продолжение ввода
-    // обработка в другом процессе () subshell
-    char *str = NULL;
-    status++;
-    struct termios savetty;
 
-    set_non_canonic(&savetty);
-    str = read_str(str);
-    set_canonic(savetty);
+static char *read_str(struct termios savetty, t_ush *ush) {
+    char *ret_str = NULL;
+    char *temp = NULL;
+    int flag = 0;
+    t_input *input = init_input();
+
+    input->savetty = savetty;
+    input->term_width = mx_get_twidth();
+    while (input->input_ch != '\r' && input->ctrl_c != 1
+            && input->term_width != 0) {
+        ret_str = inside_cycle(input, &flag, ush, ret_str);
+        if (ush->exit_status != -1)
+            break;
+        if (input->len > 0)
+            temp = mx_add_history(input, &flag, ush, temp);
+    }
+    if (ush->history->next != NULL)
+        mx_sort_history(ush, temp);
+    mx_free_step(input, temp);
+    mx_printstr("\n");
+    return ret_str;
+}
+
+char *mx_process_input(t_ush *ush) {
+    char *str = NULL;
+    struct termios savetty;
+    size_t bufsize = 32;
+    char *buffer = NULL;
+
+    if (!isatty(0)) {
+        getline(&buffer,&bufsize,stdin);
+        str = mx_strndup(buffer, mx_strlen(buffer) - 1);
+        ush->exit_non_term = 1;
+        mx_strdel(&buffer);
+    }
+    else {
+        mx_print_prompt(1, ush);
+        mx_set_non_canonic(&savetty);
+        str = read_str(savetty, ush);
+        set_canonic(savetty);
+    }
+    if (ush->history->data != NULL)
+        ush->history = mx_addelem(ush->history);
     return str;
 }

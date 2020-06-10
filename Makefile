@@ -29,6 +29,9 @@ SRC = $(addprefix $(SRC_DIR)/,\
 	builds/mx_execute_env_flags.c\
 	builds/mx_free_env.c\
 	builds/mx_env_error.c\
+	builds/mx_getenv.c\
+	builds/mx_handle_path.c \
+	builds/mx_parse_env_args.c\
 	input/mx_process_input.c \
 	input/mx_input_ascii.c \
 	input/mx_input_non_ascii.c \
@@ -57,7 +60,14 @@ SRC = $(addprefix $(SRC_DIR)/,\
 	history/mx_free_history.c \
 	utils/mx_util_get_flag_index.c \
     utils/mx_util_replace_operator.c \
-    utils/mx_util_strsplit_one.c)
+    utils/mx_util_strsplit_one.c \
+    utils/mx_util_strincpy.c \
+    utils/mx_util_strindup.c \
+    com_sub/mx_com_sub.c \
+    com_sub/mx_com_sub_back.c \
+    com_sub/mx_com_sub_free.c \
+    com_sub/mx_com_sub_space.c \
+    com_sub/mx_create_com_sub.c )
 
 OBJ = \
 	mx_cd.o \
@@ -73,8 +83,11 @@ OBJ = \
     mx_find_flag.o\
     mx_parse_echo.o\
     mx_execute_env_flags.o\
+    mx_getenv.o\
     mx_env_error.o\
     mx_free_env.o\
+    mx_handle_path.o\
+    mx_parse_env_args.o\
     mx_file_exist.o\
     mx_process_input.o \
     mx_input_ascii.o \
@@ -104,7 +117,14 @@ OBJ = \
     mx_free_history.o \
     mx_util_get_flag_index.o \
     mx_util_replace_operator.o \
-    mx_util_strsplit_one.o
+    mx_util_strsplit_one.o \
+    mx_com_sub.o \
+    mx_com_sub_back.o \
+    mx_com_sub_free.o \
+    mx_com_sub_space.o \
+    mx_create_com_sub.o \
+    mx_util_strincpy.o \
+    mx_util_strindup.o
 CC = clang
 
 CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic

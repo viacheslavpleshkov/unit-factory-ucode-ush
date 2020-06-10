@@ -16,12 +16,13 @@
 #include <dirent.h>
 #include <termcap.h>
 #include <time.h>
+#include <pwd.h>
 
-#define MX_HOME() (getenv("HOME"))
-#define MX_PATH() (getenv("PATH"))
-#define MX_SHLVL() (getenv("SHLVL"))
-#define MX_PWD() (getenv("PWD"))
-#define MX_OLDPWD() (getenv("OLDPWD"))
+#define MX_HOME() (mx_getenv("HOME"))
+#define MX_PATH() (mx_getenv("PATH"))
+#define MX_SHLVL() (mx_getenv("SHLVL"))
+#define MX_PWD() (mx_getenv("PWD"))
+#define MX_OLDPWD() (mx_getenv("OLDPWD"))
 
 #define MX_RIGHT_ARROW 67
 #define MX_LEFT_ARROW 68
@@ -41,19 +42,13 @@
 
 //Struct
 typedef struct s_queue t_queue;
-typedef struct s_com_sub t_com_sub;
 typedef struct s_input t_input;
 typedef struct s_ush t_ush;
 typedef struct s_redirect t_redirect;
 typedef struct s_env t_env;
 typedef struct s_dbl_list t_dbl_list;
-
-
-struct s_queue {
-    char *data;
-    char operator;
-    struct s_queue *next;
-};
+typedef struct s_pid t_pid;
+typedef struct s_com_sub t_com_sub;
 
 struct s_com_sub {
     int back_first;
@@ -63,6 +58,17 @@ struct s_com_sub {
     int space;
     int space_first_index;
     int space_end_index;
+    char *temp_str;
+    char *temp_data;
+    char *cout_execute;
+    char *temp_join;
+    int status;
+};
+
+struct s_queue {
+    char *data;
+    char operator;
+    struct s_queue *next;
 };
 
 struct s_input {
@@ -96,14 +102,24 @@ struct s_ush {
     char *ush_path;
     int return_value;
     int exit_status;
-    int pid;
+    t_pid *pids;
+    char *str_input;
     int exit_non_term;
+    int curr_pid;
 };
 
+struct s_pid {
+    int num;
+    int index;
+    char *str;
+    struct s_pid *next;
+    struct s_pid *prev;
+};
 struct s_redirect {
     int fd_return[2];
     int fd_stdout[2];
     int fd_stderr[2];
+    int flag;
     char *_stdout;
     char *_stderr;
 };
@@ -114,6 +130,7 @@ int mx_is_builtin(char *command);
 void mx_write_to_pipe(char *str, int *fd);
 void mx_read_from_pipe(char *str, int len, int *fd);
 char *mx_coomand_in_path(char *command, char *str_path);
+void mx_set_shl(void);
 
 //Builds function
 int mx_pwd(char **args);
@@ -125,25 +142,29 @@ int mx_exit(char **inp, int *exit_status);
 int mx_echo(char **args);
 int mx_which(char **input);
 int mx_ush(char **input, char *ush_path);
+int mx_fg(t_ush *ush);
 
 int mx_find_flag(char *flags, char *arg);
 int mx_file_exist(char *path);
 int mx_check_symlink(char *arg, int flag, int link);
-char *mx_parse_cd_args(char **args, int *flag, int len);
+char *mx_parse_cd_args(char **args, int *flag, int len, int *flag_recursion);
 char *mx_parse_echo(char **args, int *flag_n);
 int mx_execute_env_flags(t_env *env, char **args, int i, int *env_index);
 void mx_free_env(t_env *env);
-
 void mx_env_error(t_env *env, char **args, int i);
+char *mx_getenv(char *var);
+t_env *mx_parse_env_args(char **args);
+char *mx_handle_path(char *path, int i, int *fl_rec);
 
 //Executing function
-int mx_execute(t_ush *ush, char *str_input, int flag_redirect);
+int mx_execute(t_ush *ush, char *str_input, int flag_redir, char **str_red);
 int mx_push_execute_queue(t_queue **queue, t_ush *ush);
 char **mx_check_expansion(char *str_input, int ret_val);
-t_redirect *mx_create_redirect(void);
-void mx_parent_redirect(int flag_redir, t_redirect *redirect, int *return_);
-void mx_child_redirect(int flag_redirect, t_redirect *redirect);
-void mx_child_execute(int *ret_val, char **input, int *fd, t_ush *ush);
+t_redirect *mx_create_redirect(int flag_redir);
+void mx_parent_redirect(t_redirect *redirect, int *return_);
+void mx_child_redirect(t_redirect *redirect);
+void mx_child_execute(int *ret, char **input, t_redirect *red, t_ush *ush);
+void mx_free_execute(t_redirect *redirect, char **input);
 
 //Input function
 void mx_clear_str();
@@ -170,10 +191,7 @@ t_queue *mx_create_queue(char *data, char operation);
 void mx_pop_front_queue(t_queue **head);
 void mx_push_back_queue(t_queue **queue, char *data, char operation);
 void mx_insort_t_queue(char *arr, t_queue **arr_queue);
-//Command_substitution
-t_com_sub* mx_create_com_sub();
-bool mx_com_sub_validation(char *data);
-char *mx_com_sub(char *data);
+
 //Printing function
 void mx_print_prompt(int flag, t_ush *ush);
 
@@ -181,6 +199,15 @@ void mx_print_prompt(int flag, t_ush *ush);
 char **mx_util_strsplit_one(const char *s, char *c);
 char *mx_util_replace_operator(char *s);
 int mx_util_get_flag_index(const char *str, const char *sub);
+char *mx_util_strincpy(char *dst, const char *src, int first, int end);
+char *mx_util_strindup(const char *data, int first, int end);
+
+//Com sub
+t_com_sub* mx_create_com_sub();
+int mx_com_sub_space(char **data, t_com_sub *c, t_ush *ush, int i);
+int mx_com_sub_back(char **data, t_com_sub *c, t_ush *ush, int i);
+void mx_com_sub(char **data, t_ush *ush);
+void mx_com_sub_free(t_com_sub *com_sub);
 
 //History
 void mx_free_history(t_dbl_list *history);

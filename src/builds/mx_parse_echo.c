@@ -30,7 +30,7 @@ static int quot_error(char **parse_str, int *flag_n, int flag_quot) {
 }
 
 static char *fill_parsed_str(char *str, int *flag_n, int flag) {
-    char *parse_str = mx_strnew(100);
+    char *parse_str = mx_strnew(1000);
     int flag_quot = 1;
     int index = 0;
 
@@ -52,7 +52,7 @@ static char *fill_parsed_str(char *str, int *flag_n, int flag) {
 }
 
 static int echo_flag(char *arg, int *flag_n) {
-    int flag = 0;
+    int flag = 1;
 
     for (int y = 1; y < mx_strlen(arg); y++) {
         if (arg[y] == 'e' && flag != 2)
@@ -70,7 +70,7 @@ static int echo_flag(char *arg, int *flag_n) {
 }
 
 char *mx_parse_echo(char **args, int *flag_n) {
-    int flag = 0;
+    int flag = 1;
     char *str = NULL;
 
     for (int i = 1; i < mx_count_arr_el(args); i++) {
@@ -79,9 +79,9 @@ char *mx_parse_echo(char **args, int *flag_n) {
             if (flag >= 0)
                 continue;
         }
-        if (str == NULL)
+        if (str == NULL && mx_strcmp(args[i], "") != 0)
             str = strdup(args[i]);
-        else {
+        else if (mx_strcmp(args[i], "") != 0) {
             str = realloc(str, strlen(str) + strlen(args[i]) + 2);
             strcat(str, " ");
             strcat(str, args[i]);

@@ -20,13 +20,17 @@ static void parse_pwd(char **args, int *flag) {
             if((*flag = mx_find_flag("LP", args[i])) > 0)
                 continue;
         }
+        else {
+            *flag = 3;
+            fprintf(stderr, "pwd: too many arguments\n");
+        }
     }
 }
 
 
 int mx_pwd(char **args) {
     int flag = 0;
-    char *position = mx_strdup(MX_PWD());
+    char *position = MX_PWD();
     int is_link = 0;
 
     parse_pwd(args, &flag);

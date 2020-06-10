@@ -22,31 +22,36 @@ static void child_not_builtin(int *ret_val, char **input, char *command_p) {
     }
 }
 
-static void child_free(char *ret, char *command_p) {
+static void child_free(char *command_p, int *fd, int ret_val) {
+    char *ret = NULL;
+
+    ret = mx_itoa(ret_val);
+    mx_write_to_pipe(ret, fd);
     mx_strdel(&ret);
     mx_strdel(&command_p);
 }
 
-void mx_child_execute(int *ret_val, char **input, int *fd, t_ush *ush) {
+void mx_child_execute(int *ret, char **input, t_redirect *red, t_ush *ush) {
     char *command_p = mx_coomand_in_path(input[0], MX_PATH());
     int command = mx_is_builtin(command_p);
-    char *ret = NULL;
 
+    signal(SIGTSTP, SIG_DFL);
+    mx_child_redirect(red);
     if (command == 2)
-        *ret_val = mx_pwd(input);
+        *ret = mx_pwd(input);
     else if (command == 3)
-        *ret_val = mx_env(input, ush);
+        *ret = mx_env(input, ush);
     else if (command == 4)
-        *ret_val = mx_ush(input, ush->ush_path);
+        *ret = mx_ush(input, ush->ush_path);
     else if (command == 8)
-        *ret_val = mx_which(input);
+        *ret = mx_which(input);
     else if (command == 9)
-        *ret_val = mx_echo(input);
+        *ret = mx_echo(input);
+    else if (command == 10)
+        *ret = mx_fg(ush);
     else if (command == 0)
-        child_not_builtin(ret_val, input, command_p);
-    ret = mx_itoa(*ret_val);
-    mx_write_to_pipe(ret, fd);
-    child_free(ret, command_p);
+        child_not_builtin(ret, input, command_p);
+    child_free(command_p, red->fd_return, *ret);
     exit(0);
 }
 

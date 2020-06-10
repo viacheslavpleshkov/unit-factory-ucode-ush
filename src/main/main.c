@@ -15,17 +15,24 @@ static void sigint () {
     mx_printstr("\n");
 }
 
-static void set_shlvl(void) {
-    char *shlvl = mx_itoa(mx_atoi(MX_SHLVL()) + 1);
-
-    setenv("SHLVL", shlvl, 1);
-    mx_strdel(&shlvl);
-}
-
 static void argc_error(int argc, char **argv) {
     if (argc > 1) {
         fprintf(stderr, "ush: can't open input file: %s\n", argv[1]);
         exit(127);
+    }
+}
+static void free_pids(t_pid *pids) {
+    t_pid *temp = NULL;
+
+    if(pids != NULL) {
+        while (pids->prev != NULL) {
+            temp = pids;
+            pids = pids->prev;
+            mx_strdel(&temp->str);
+            free(temp);
+        }
+        mx_strdel(&pids->str);
+        free(pids);
     }
 }
 
@@ -34,18 +41,18 @@ int main(int argc, char **argv){
 
     argc_error(argc, argv);
     ush = mx_create_ush(argv);
-    set_shlvl();
+    mx_set_shl();
     while (1) {
         signal(SIGINT, sigint);
         signal(SIGTSTP, SIG_IGN);
         ush->command = mx_process_input(ush);
         executing(ush);
-        mx_strdel(&ush->command);
         if (ush->exit_status != -1 || ush->exit_non_term == 1)
             break;
     }
     mx_free_history(ush->history);
     mx_strdel(&ush->ush_path);
+    free_pids(ush->pids);
     free(ush);
     if (ush->exit_status != -1)
         exit(ush->exit_status);

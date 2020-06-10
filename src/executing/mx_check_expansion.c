@@ -1,25 +1,39 @@
 #include "ush.h"
 
-static char *tidle_check(char *input) {
-    char *tmp = mx_strdup(input);
+static void if_tidle(char **inp, char *home, char *pwd) {
+    char *tmp = mx_strdup(*inp);
 
-    if (mx_isalpha(input[1])) {
-        mx_strdel(&input);
-        input = mx_replace_substr(tmp, "~", "/Users/");
+    if (mx_isalpha((*inp)[1])) {
+        mx_strdel(inp);
+        *inp = mx_replace_substr(tmp, "~", "/Users/");
     }
-    else if (input[1] == '/' || input[1] == '\0') {
-        mx_strdel(&input);
-        input = mx_replace_substr(tmp, "~", MX_HOME());
+    else if ((*inp)[1] == '/' || (*inp)[1] == '\0') {
+        mx_strdel(inp);
+        *inp = mx_replace_substr(tmp, "~", home);
     }
-    else if (input[1] == '+' && (input[2] == '/' || input[2] == '\0')) {
-        mx_strdel(&input);
-        input = mx_replace_substr(tmp, "~+", MX_PWD());
+    else if ((*inp)[1] == '+' && ((*inp)[2] == '/' || (*inp)[2] == '\0')) {
+        mx_strdel(inp);
+        *inp = mx_replace_substr(tmp, "~+", pwd);
     }
-    else if (input[1] == '-' && (input[2] == '/' || input[2] == '\0')) {
-        mx_strdel(&input);
-        input = mx_replace_substr(tmp, "~-", MX_OLDPWD());
+    else if ((*inp)[1] == '-' && ((*inp)[2] == '/' || (*inp)[2] == '\0')) {
+        if (MX_OLDPWD() != NULL) {
+            mx_strdel(inp);
+            *inp = mx_replace_substr(tmp, "~-", MX_OLDPWD());
+        }
     }
     mx_strdel(&tmp);
+}
+static char *tidle_check(char *input) {//temporary for all
+    char *home = mx_strdup("");
+    char *pwd = MX_PWD();
+
+    if (getenv("HOME") != NULL) {
+        mx_strdel(&home);
+        home = MX_HOME();
+    }
+    if_tidle(&input, home, pwd);
+    mx_strdel(&home);
+    mx_strdel(&pwd);
     return input;
 }
 
@@ -45,10 +59,12 @@ static char *dollar_check(int len, char *in) {
     char *var = NULL;
     extern char **environ;
     int x = 0;
+    int flag = 0;
 
     var = dollar_change(len, in);
     for (int j = 0; environ[j]!= NULL; j++) {
         if (strstr(environ[j], var) != NULL) {
+            flag = 1;
             in = realloc(in, mx_strlen(environ[j]) - mx_strlen(var) + 1);
             x = 0;
             for (int y = mx_strlen(var); y <= mx_strlen(environ[j]); y++)
@@ -56,6 +72,10 @@ static char *dollar_check(int len, char *in) {
         }
     }
     mx_strdel(&var);
+    if (flag == 0) {
+        mx_strdel(&in);
+        in = mx_strdup("");
+    }
     return in;
 }
 

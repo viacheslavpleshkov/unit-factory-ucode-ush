@@ -14,7 +14,7 @@ int mx_is_builtin(char *command) {
     int num = 0;
     char builtins[][20] = {"/usr/bin/cd", "/bin/pwd", "/usr/bin/env",
                            "ush", "export", "unset", "exit",
-                           "/usr/bin/which", "/bin/echo", "history"};
+                           "/usr/bin/which", "/bin/echo", "/usr/bin/fg"};
 
     for (int i = 0; i < mx_strlen(command); i++)
         command[i] = (char)mx_tolower(command[i]);

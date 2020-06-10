@@ -1,6 +1,6 @@
 #include "ush.h"
 
-static int mx_get_flag_index(const char *str, const char *sub) {
+static int get_flag_index(const char *str, const char *sub) {
     int len_str = 0;
     int len_sub = 0;
 
@@ -32,8 +32,8 @@ void mx_insort_t_queue(char *arr, t_queue **arr_queue) {
     char *temp = mx_strdup(arr);
 
     for (int j = 0; j <= count; j++) {
-            and = mx_get_flag_index(temp, "&&");
-            or = mx_get_flag_index(temp, "||");
+            and = get_flag_index(temp, "&&");
+            or = get_flag_index(temp, "||");
             if ((and >= 0) && (and < or))
                 temp = push_back_queue("&&", temp, arr_queue);
             else if ((or >= 0) && (or < and ))

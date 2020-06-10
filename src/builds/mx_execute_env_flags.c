@@ -80,7 +80,7 @@ int mx_execute_env_flags(t_env *env, char **args, int i, int *env_index) {
         return flag_i(env, args, i, env_index);
     else if (env->flag == 3 && args[i-1][0] == '-')
         return flag_u(env, args[i], environ);
-    else {
+    else if (mx_strcmp(args[i], "./ush") != 0){
         mx_env_error(env, args, i);
         return -1;
     }

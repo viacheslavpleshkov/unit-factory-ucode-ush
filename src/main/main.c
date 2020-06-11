@@ -8,7 +8,8 @@ static void executing(t_ush *ush) {
         ush->return_value = mx_push_execute_queue(queue, ush);
     }
     mx_strdel(&ush->command);
-    free(queue);
+    if (queue != NULL)
+        free(queue);
 }
 
 static void sigint () {
@@ -41,15 +42,15 @@ int main(int argc, char **argv){
 
     argc_error(argc, argv);
     ush = mx_create_ush(argv);
-    mx_set_shl();
-    while (1) {
+//    mx_set_shl();
+//    while (1) {
         signal(SIGINT, sigint);
         signal(SIGTSTP, SIG_IGN);
-        ush->command = mx_process_input(ush);
+        ush->command = mx_strdup("ls && pwd && pwd && pwd");
         executing(ush);
-        if (ush->exit_status != -1 || ush->exit_non_term == 1)
-            break;
-    }
+//        if (ush->exit_status != -1 || ush->exit_non_term == 1)
+//            break;
+//    }
     mx_free_history(ush->history);
     mx_strdel(&ush->ush_path);
     free_pids(ush->pids);

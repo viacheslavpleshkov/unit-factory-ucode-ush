@@ -14,8 +14,12 @@ int mx_push_execute_queue(t_queue **queue, t_ush *ush) {
             if (status == 0 && queue[i]->operator == '&') {
                 mx_pop_front_queue(&queue[i]);
                 continue;
-            }
-            else if (queue[i]->operator == '|' && status == 0) {
+            } else if (status == 1 && queue[i]->operator == '&') {
+                mx_pop_front_queue(&queue[i]);
+                while (queue[i] != NULL && (queue[i]->operator == '&' || queue[i]->operator == '0'))
+                    mx_pop_front_queue(&queue[i]);
+                continue;
+            } else if (queue[i]->operator == '|' && status == 0) {
                 mx_pop_front_queue(&queue[i]);
                 while (queue[i] != NULL && queue[i]->operator == '|')
                     mx_pop_front_queue(&queue[i]);

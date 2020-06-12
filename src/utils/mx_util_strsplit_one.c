@@ -26,20 +26,18 @@ static char **one_if(char *str_rep) {
     return result;
 }
 
-static char **two_if(char *str_rep, char *temp_str, char *str_join, char *c) {
-    char **result = NULL;
-    int and = 0;
-    int or = 0;
+static char **two_if(char *str_rep, char *c) {
+    char **result = (char**) malloc(sizeof(char*) * (3));
+    char *temp_str = mx_strndup(str_rep, mx_get_substr_index(str_rep, c));
+    char *str_join = NULL;
+    int and = mx_util_get_flag_index(str_rep, "&&");
+    int or = mx_util_get_flag_index(str_rep, "||");
 
-    result = (char**) malloc(sizeof(char*) * (3));
-    temp_str = mx_strndup(str_rep, mx_get_substr_index(str_rep, c));
     result[0] = mx_strtrim(temp_str);
-    and = mx_util_get_flag_index(str_rep, "&&");
-    or = mx_util_get_flag_index(str_rep, "||");
     if ((and >= 0) && (and < or))
-        str_join = mx_strjoin(result[0], "&&");
+        str_join = mx_strjoin(result[0], " &&");
     else
-        str_join = mx_strjoin(result[0], "||");
+        str_join = mx_strjoin(result[0], " ||");
     result[1] = replace(str_rep, str_join);
     result[2] = NULL;
     mx_strdel(&str_join);
@@ -50,14 +48,12 @@ static char **two_if(char *str_rep, char *temp_str, char *str_join, char *c) {
 
 char **mx_util_strsplit_one(const char *s, char *c) {
     char **result = NULL;
-    char *str_join = NULL;
     char *str_rep = NULL;
-    char *temp_str = NULL;
 
-    str_rep  = mx_util_replace_operator((char *)s);
+    str_rep = mx_strtrim((char *)s);
     if (mx_count_queue_operation(str_rep) == 0)
         result = one_if(str_rep);
     else
-        result = two_if(str_rep, temp_str, str_join, c);
+        result = two_if(str_rep, c);
     return result;
 }

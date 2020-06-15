@@ -3,7 +3,7 @@
 static void events (t_input *input, int *exit_status) {
     if (input->input_ch == 4) {
         set_canonic(input->savetty);
-        *exit_status = 0;
+        *exit_status = 1;
     }
     else if (input->input_ch == 3)
         input->ctrl_c = 1;

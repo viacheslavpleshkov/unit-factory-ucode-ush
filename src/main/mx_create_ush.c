@@ -46,6 +46,9 @@ void mx_set_shl(void) {
         if (getcwd(cwd, sizeof(cwd)) != NULL)
             setenv("PWD", cwd, 1);
     }
+    if (getenv("PATH") == NULL) {
+        setenv("PATH", MX_PATH(), 1);
+    }
     if (getenv("SHLVL") == NULL)
         setenv("SHLVL", "1", 1);
     else

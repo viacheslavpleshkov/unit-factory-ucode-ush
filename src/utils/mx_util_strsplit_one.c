@@ -18,7 +18,6 @@ static char *replace(const char *s, char *str_join) {
 
 static char **one_if(char *str_rep) {
     char **result = NULL;
-
     result = (char**) malloc(sizeof(char*) * (2));
     result[0] = mx_strdup(str_rep);
     result[1] = NULL;
@@ -28,32 +27,29 @@ static char **one_if(char *str_rep) {
 
 static char **two_if(char *str_rep, char *c) {
     char **result = (char**) malloc(sizeof(char*) * (3));
-    char *temp_str = mx_strndup(str_rep, mx_get_substr_index(str_rep, c));
-    char *str_join = NULL;
-    int and = mx_util_get_flag_index(str_rep, "&&");
-    int or = mx_util_get_flag_index(str_rep, "||");
+    int leng = mx_get_substr_index(str_rep, c);
+    char *temp_str = mx_strndup(str_rep, leng);
+    char *str_replace = mx_strndup(str_rep, leng + 2);
+    char *str_trim = NULL;
 
-    result[0] = mx_strtrim(temp_str);
-    if ((and >= 0) && (and < or))
-        str_join = mx_strjoin(result[0], " &&");
-    else
-        str_join = mx_strjoin(result[0], " ||");
-    result[1] = replace(str_rep, str_join);
+    result[0] = temp_str;
+    str_trim = replace(str_rep, str_replace);
+    result[1] = mx_strtrim(str_trim);
     result[2] = NULL;
-    mx_strdel(&str_join);
-    mx_strdel(&temp_str);
-    mx_strdel(&str_rep);
+    mx_strdel(&str_replace);
+    mx_strdel(&str_trim);
     return result;
 }
 
 char **mx_util_strsplit_one(const char *s, char *c) {
     char **result = NULL;
     char *str_rep = NULL;
-
-    str_rep = mx_strtrim((char *)s);
+    str_rep = mx_util_replace_operator((char *)s);
     if (mx_count_queue_operation(str_rep) == 0)
         result = one_if(str_rep);
     else
         result = two_if(str_rep, c);
+    mx_strdel(&str_rep);
     return result;
 }
+

@@ -32,10 +32,9 @@ static void child_free(char *command_p, int *fd, int ret_val) {
 }
 
 void mx_child_execute(int *ret, char **input, t_redirect *red, t_ush *ush) {
-    char *command_p = mx_coomand_in_path(input[0], MX_PATH());
+    char *command_p = mx_coomand_in_path(input[0], getenv("PATH"));
     int command = mx_is_builtin(command_p);
 
-    signal(SIGTSTP, SIG_DFL);
     mx_child_redirect(red);
     if (command == 2)
         *ret = mx_pwd(input);
@@ -47,8 +46,6 @@ void mx_child_execute(int *ret, char **input, t_redirect *red, t_ush *ush) {
         *ret = mx_which(input);
     else if (command == 9)
         *ret = mx_echo(input);
-    else if (command == 10)
-        *ret = mx_fg(ush);
     else if (command == 0)
         child_not_builtin(ret, input, command_p);
     child_free(command_p, red->fd_return, *ret);

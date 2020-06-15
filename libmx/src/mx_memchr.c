@@ -1,7 +1,7 @@
 #include "libmx.h"
 
 void *mx_memchr(const void *s, int c, size_t n) {
-	unsigned char *ptr = (unsigned char *)s;
+	unsigned char *ptr = (unsigned char*)s;
 
 	while (n > 0) {
 		if (*ptr == (unsigned char)c)

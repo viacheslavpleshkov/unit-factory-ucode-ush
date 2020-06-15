@@ -18,5 +18,6 @@ void mx_pop_index(t_list **list, int index) {
         last = last -> next;
     }
     last -> next = present -> next;
-    free(present);
+    if (present != NULL)
+        free(present);
 }

@@ -8,6 +8,5 @@ char *mx_strncpy(char *dst, const char *src, int len) {
 
     for (; i < len; i++)
         dst[i] = '\0';
-
     return dst;
 }

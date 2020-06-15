@@ -1,10 +1,10 @@
 #include "ush.h"
 
 static t_input *init_input() {
-    t_input *input = (t_input *)malloc(sizeof (t_input));
+    t_input *input = (t_input *) malloc(sizeof (t_input));
 
     input->len = 0;
-    input->command = mx_strnew(1000);//?
+    input->command = mx_strnew(1);//?
     input->ctrl_c = 0;
     input->coursor_position = 0;
     input->input_ch = '\0';

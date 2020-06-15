@@ -37,10 +37,4 @@ int mx_unset(char **args) {
     return 0;
 }
 
-int mx_fg(t_ush *ush) {
-    if (ush->pids != NULL) {
-        kill(ush->curr_pid, SIGCONT);
-    }
-    return 0;
-}
 

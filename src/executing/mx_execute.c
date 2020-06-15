@@ -1,10 +1,11 @@
 #include "ush.h"
 
-static int par_exec_command(char **input, int *exit_status) {
+static int par_exec_command(char **input, t_ush *ush, pid_t pid) {
     char *command_p = mx_coomand_in_path(input[0], MX_PATH());
     int command = mx_is_builtin(command_p);
     int ret_val = 0;
 
+    ush->curr_pid = pid;
     if (command == 1)
         ret_val = mx_cd(input);
     else if (command == 5)
@@ -12,7 +13,7 @@ static int par_exec_command(char **input, int *exit_status) {
     else if (command == 6)
         ret_val = mx_unset(input);
     else if (command == 7)
-        ret_val = mx_exit(input, exit_status);
+        ret_val = mx_exit(input, &ush->exit_status);
     mx_strdel(&command_p);
     return ret_val;
 }
@@ -34,6 +35,7 @@ static void fill_jobs(pid_t pid, t_ush *ush) {
 static void free_jobs(t_ush *ush) {
     char **input = mx_strsplit(ush->str_input, ' ');
     t_pid *temp = NULL;
+
     if (mx_strcmp(input[0], "fg") == 0 && ush->pids != NULL) {
         mx_strdel(&ush->str_input);
         ush->curr_pid = ush->pids->num;
@@ -77,8 +79,7 @@ int mx_execute(t_ush *ush, char *str_input, int flag_redir, char **str_red) {
 
     pid = fork();
     if (pid != 0) {
-        ush->curr_pid = pid;
-        return_ = par_exec_command(input, &ush->exit_status);
+        return_ = par_exec_command(input, ush, pid);
         check_for_redir(&return_, redirect->fd_return, redirect, ush);
     }
     else

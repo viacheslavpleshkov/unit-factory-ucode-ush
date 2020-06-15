@@ -23,21 +23,21 @@ static void flag_P(t_env *env, char *arg) {
     }
 }
 
-static int flag_i(t_env *env, char **args, int i, int *env_index) {
+static int flag_i(t_env *env, char **args, int i, int *env_in) {
     if (mx_get_char_index(args[i], '=') == 0) {
         fprintf(stderr, "env: setenv %s: Invalid argument\n", args[i]);
         mx_free_env(env);
         return -1;
     }
     if (args[i-1][0] == '-') {
-        env->env_var = (char**)malloc((2) * sizeof(char *));
-        env->env_var[*env_index++] = mx_strdup(args[i]);
-        env->env_var[*env_index] = NULL;
+        env->env_var = (char **) malloc(2 * sizeof (char *));
+        env->env_var[(*env_in)++] = mx_strdup(args[i]);
+        env->env_var[*env_in] = NULL;
     }
     else {
-        env->env_var = realloc(env->env_var, *env_index + 2);
-        env->env_var[*env_index++] = mx_strdup(args[i]);
-        env->env_var[*env_index] = NULL;
+        env->env_var = realloc(env->env_var, (*env_in + 2) * sizeof (char *));
+        env->env_var[(*env_in)++] = mx_strdup(args[i]);
+        env->env_var[*env_in] = NULL;
     }
     return 0;
 }
@@ -51,12 +51,11 @@ static int flag_u(t_env *env, char *arg, char **environ) {
         mx_free_env(env);
         return -1;
     }
-    mx_free_void_arr((void**)env->env_var, mx_count_arr_el(env->env_var));
-    env->env_var = malloc((1) * sizeof(char*));
+    env->env_var = malloc((1) * sizeof (char*));
     temp = mx_strjoin(arg, "=");
     for (int j = 0; environ[j]!= NULL; j++) {
         if(strstr(environ[j], temp) == NULL) {
-            env->env_var = realloc(env->env_var,(y + 2) * sizeof(char*));
+            env->env_var = realloc(env->env_var,(y + 2) * sizeof (char*));
             env->env_var[y++] = mx_strdup(environ[j]);
         }
     }
@@ -68,8 +67,8 @@ static int flag_u(t_env *env, char *arg, char **environ) {
 int mx_execute_env_flags(t_env *env, char **args, int i, int *env_index) {
     extern char **environ;
 
-    if (env->flag == 2 && i == 2)
-        mx_free_void_arr((void **)env->env_var, mx_count_arr_el(env->env_var));
+    if (env->flag == 2 && args[i-1][0] == '-')
+        mx_del_strarr(&env->env_var);
     if (env->comm != NULL && mx_strcmp(args[i],env->comm) != 0)
         return do_command(env, args, i);
     else if (env->flag == 1 && args[i-1][0] == '-'

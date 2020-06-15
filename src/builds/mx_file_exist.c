@@ -6,7 +6,9 @@ int mx_file_exist(char *path) {
 
     if ((lstat(path, st) != -1))
         flag = 1;
-    free(st);
-    st = NULL;
+    if (st != NULL) {
+        free(st);
+        st = NULL;
+    }
     return flag;
 }

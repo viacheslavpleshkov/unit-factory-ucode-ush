@@ -2,7 +2,6 @@
 
 int mx_env(char **args, t_ush *ush) {
     t_env *env = mx_parse_env_args(args);
-    int ret_val = 0;
     char **env_args = NULL;
 
     if (env != NULL) {
@@ -12,14 +11,14 @@ int mx_env(char **args, t_ush *ush) {
             env_args = mx_strsplit(env->comm_args, ' ');
             if (fork())
                 wait(NULL);
-            else if (env->env_var != NULL){
-                if (execve(env_args[0], env_args, env->env_var) == -1)
-                    perror("execve");
+            else {
+                execve(env_args[0], env_args, env->env_var);
                 exit(1);
             }
-            mx_free_void_arr((void**)env_args, mx_count_arr_el(env_args));
+            mx_free_void_arr((void **)env_args, mx_count_arr_el(env_args));
         }
-        return ret_val;
+        mx_free_env(env);
+        return 0;
     }
     return 1;
 }

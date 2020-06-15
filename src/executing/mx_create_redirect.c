@@ -1,10 +1,12 @@
 #include "ush.h"
 
 void mx_free_execute(t_redirect *redirect, char **input) {
-    mx_strdel(&redirect->_stderr);
-    mx_strdel(&redirect->_stdout);
-    free(redirect);
-    mx_free_void_arr((void**)input, mx_count_arr_el(input));
+    if (redirect != NULL) {
+        mx_strdel(&redirect->_stderr);
+        mx_strdel(&redirect->_stdout);
+        free(redirect);
+    }
+    mx_free_void_arr((void **) input, mx_count_arr_el(input));
 }
 
 t_redirect *mx_create_redirect(int flag_redir) {
@@ -29,6 +31,7 @@ void mx_parent_redirect(t_redirect *redirect, int *return_) {
 }
 
 void mx_child_redirect(t_redirect *redirect) {
+    signal(SIGTSTP, SIG_DFL);
     if (redirect->flag == 1) {
         if (dup2(redirect->fd_stdout[1], 1) == -1)
             perror("dup2");

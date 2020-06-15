@@ -24,7 +24,6 @@ SRC = $(addprefix $(SRC_DIR)/,\
 	builds/mx_check_symlink.c\
 	builds/mx_find_flag.c\
 	builds/mx_file_exist.c\
-	builds/mx_parse_cd_args.c\
 	builds/mx_parse_echo.c\
 	builds/mx_execute_env_flags.c\
 	builds/mx_free_env.c\
@@ -52,6 +51,8 @@ SRC = $(addprefix $(SRC_DIR)/,\
 	executing/mx_check_expansion.c \
 	executing/mx_create_redirect.c\
 	executing/mx_child_execute.c\
+	executing/mx_split_echo.c \
+    executing/mx_tidle_check.c \
 	main/mx_coomand_in_path.c \
 	main/mx_create_ush.c \
 	main/mx_is_builtin.c \
@@ -78,7 +79,6 @@ OBJ = \
     mx_echo.o \
     mx_which.o \
     mx_ush.o \
-    mx_parse_cd_args.o\
     mx_check_symlink.o\
     mx_find_flag.o\
     mx_parse_echo.o\
@@ -124,6 +124,8 @@ OBJ = \
     mx_com_sub_space.o \
     mx_create_com_sub.o \
     mx_util_strincpy.o \
+    mx_split_echo.o \
+    mx_tidle_check.o \
     mx_util_strindup.o
 CC = clang
 
@@ -131,12 +133,12 @@ CFLAGS = -std=c11 -Wall -Wextra -Werror -Wpedantic
 
 all : install
 
-install : libmx/libmx.a uls
+install : libmx/libmx.a ush
 
 libmx/libmx.a:
 	@make -C $(LIBMXF)
 
-uls : $(SRC) inc/ush.h libmx/libmx.a
+ush : $(SRC) inc/ush.h libmx/libmx.a
 	@$(CC) $(CFLAGS) -c $(SRC) $(foreach d, $(INC), -I $d)
 	@$(CC) $(CFLAGS) $(OBJ) $(LIBMXF)/$(LIB_NAME) -o $(APP_NAME) -ltermcap
 	@printf "\r\33[2Kush \033[32;1mcreated\033[0m\n"

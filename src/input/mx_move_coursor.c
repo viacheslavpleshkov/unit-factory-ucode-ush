@@ -2,9 +2,10 @@
 
 void mx_insert_char(t_input *input, char sym, int index) {
     char temp;
+    int len = mx_strlen(input->command);
 
-    input->command = realloc(input->command, mx_strlen(input->command) + 2);
-    for (; index < mx_strlen(input->command) + 1; index++) {
+    input->command = realloc(input->command, len + 2);
+    for (; index < len + 1; index++) {
         temp = input->command[index];
         input->command[index] = sym;
         sym = temp;
@@ -14,8 +15,10 @@ void mx_insert_char(t_input *input, char sym, int index) {
 
 
 void mx_delete_char(t_input *input, int index) {
-    input->command = mx_realloc(input->command, strlen(input->command));
-    for (; index < mx_strlen(input->command) - 1; index++) {
+    int len =  mx_strlen(input->command);
+
+    input->command = realloc(input->command, len);
+    for (; index < len - 1; index++) {
         input->command[index] = input->command[index + 1];
     }
     input->command[index] = '\0';
@@ -29,7 +32,6 @@ void mx_move_coursor(int num_of_moves, char *side) {
 
     mx_strdel(&str1);
     mx_strdel(&temp);
-    str[mx_strlen(str) + 1] = '\0';
     mx_printstr(str);
     mx_strdel(&str);
 }

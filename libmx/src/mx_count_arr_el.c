@@ -3,7 +3,7 @@
 int mx_count_arr_el(char **arr) {
     int counter = 0;
     
-    if(arr != NULL){
+    if (arr != NULL){
         while (arr[counter]){
             counter++;
         }   

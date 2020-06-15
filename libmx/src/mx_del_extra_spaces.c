@@ -15,7 +15,8 @@ char *mx_del_extra_spaces(const char *str) {
     int len = 0;
     int i = 0;
 
-    if (!str) return NULL;
+    if (!str)
+        return NULL;
     len = check_len(str) + mx_count_words_space(str) - 1;
     if (len < 0) 
         return mx_strnew(0);

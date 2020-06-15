@@ -1,17 +1,23 @@
 #include "ush.h"
 
+static void cd_err(char c, int *flag) {
+    if (c != '\0')
+        fprintf(stderr, MX_PWD_ERR, c);
+    else
+        fprintf(stderr, "pwd: too many arguments\n");
+    *flag = 3;
+}
+
 static void parse_pwd(char **args, int *flag) {
     int len = mx_count_arr_el(args);
-    int stop = 0;
 
-    for (int i = 1; i < len; i++) {
+    for (int i = 1, stop = 0; i < len; i++) {
         if (mx_strcmp(args[i], "--") == 0)
             stop = 3;
         if (stop == 0 && args[i][0] == '-') {
             for (int y =1; y < mx_strlen(args[i]); y++) {
                 if (args[i][y] != 'L' && args[i][y] != 'P') {
-                    fprintf(stderr, MX_PWD_ERR, args[i][y]);
-                    *flag = 3;
+                    cd_err(args[i][y], flag);
                     break;
                 }
             }
@@ -20,10 +26,8 @@ static void parse_pwd(char **args, int *flag) {
             if((*flag = mx_find_flag("LP", args[i])) > 0)
                 continue;
         }
-        else {
-            *flag = 3;
-            fprintf(stderr, "pwd: too many arguments\n");
-        }
+        else
+            cd_err('\0', flag);
     }
 }
 
@@ -34,7 +38,7 @@ int mx_pwd(char **args) {
     int is_link = 0;
 
     parse_pwd(args, &flag);
-    is_link = mx_check_symlink(position, flag, 2);
+    is_link = mx_check_symlink(&position, flag, 2);
     if (flag != 3) {
         mx_printstr(position);
         mx_printchar('\n');

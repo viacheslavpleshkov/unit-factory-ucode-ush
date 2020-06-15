@@ -14,9 +14,8 @@ static void check_builtin(char *input, int *ret_flag, int flag) {
     char *tmp = NULL;
 
     tmp = mx_coomand_in_path(input, MX_PATH());
-    if (mx_is_builtin(tmp) != 0) {
-        if (flag != 1)
-            printf("%s: shell built-in command\n", input);
+    if (mx_is_builtin(tmp) != 0 && flag != 1) {
+        printf("%s: shell built-in command\n", input);
         if (flag == 2 && strcmp(tmp, input) != 0)
             printf("%s\n", tmp);
     }

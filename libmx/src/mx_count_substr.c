@@ -12,6 +12,5 @@ int mx_count_substr(const char *str, const char *sub) {
         temp = mx_strstr(temp, sub);
         counts++;
     }
-
     return counts;
 }

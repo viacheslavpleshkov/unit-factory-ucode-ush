@@ -32,7 +32,7 @@ char *mx_getenv(char *var) {
     }
     if (strcmp(var, "PATH") == 0) {
         if (getenv("PATH") == NULL)
-            return "/Users/asvyryda/.brew/bin:/bin:/usr/bin:/usr/ucb:/usr/local/bin";
+            return "/bin:/usr/bin:/usr/ucb:/usr/local/bin";
         return getenv("PATH");
     }
     return NULL;

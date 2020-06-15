@@ -6,7 +6,7 @@ int mx_echo(char **args) {
 
     if (str != NULL)
         mx_printstr(str);
-    if (flag == 0 && (str != NULL || args[1] != NULL))
+    if (flag == 0)
         mx_printchar('\n');
     else if (flag == -1)
         return 1;

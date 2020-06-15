@@ -30,6 +30,7 @@
 #define MX_DOWN_ARROW 66
 #define MX_ENTER 13
 #define MX_BACKSPACE 127
+#define MX_TAB 9
 
 #define MX_ENV_US "env: option requires an argument -- %c\nusage: env [-i] \
 [-P utilpath] [-u name]\n           \
@@ -142,19 +143,18 @@ int mx_exit(char **inp, int *exit_status);
 int mx_echo(char **args);
 int mx_which(char **input);
 int mx_ush(char **input, char *ush_path);
-int mx_fg(t_ush *ush);
 
 int mx_find_flag(char *flags, char *arg);
 int mx_file_exist(char *path);
-int mx_check_symlink(char *arg, int flag, int link);
-char *mx_parse_cd_args(char **args, int *flag, int len, int *flag_recursion);
+int mx_check_symlink(char **arg, int flag, int link);
 char *mx_parse_echo(char **args, int *flag_n);
 int mx_execute_env_flags(t_env *env, char **args, int i, int *env_index);
 void mx_free_env(t_env *env);
 void mx_env_error(t_env *env, char **args, int i);
 char *mx_getenv(char *var);
 t_env *mx_parse_env_args(char **args);
-char *mx_handle_path(char *path, int i, int *fl_rec);
+int mx_make_path(char *path);
+void mx_setenv_ush(char *arg);
 
 //Executing function
 int mx_execute(t_ush *ush, char *str_input, int flag_redir, char **str_red);
@@ -165,6 +165,9 @@ void mx_parent_redirect(t_redirect *redirect, int *return_);
 void mx_child_redirect(t_redirect *redirect);
 void mx_child_execute(int *ret, char **input, t_redirect *red, t_ush *ush);
 void mx_free_execute(t_redirect *redirect, char **input);
+int mx_check_echo(char **n);
+char **mx_split_echo(char *str_input, int check);
+void mx_tidle_check(char **input);
 
 //Input function
 void mx_clear_str();

@@ -39,8 +39,10 @@ t_dbl_list *mx_addelem(t_dbl_list *history) {
 
 void mx_free_step(t_input *input, char *temp) {
     mx_strdel(&temp);
-    mx_strdel(&input->command);
-    free(input);
+    if (input != NULL) {
+        mx_strdel(&input->command);
+        free(input);
+    }
 }
 
 int mx_getch(t_input *input) {

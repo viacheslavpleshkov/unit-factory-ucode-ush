@@ -8,10 +8,9 @@ static t_env *create_env(void) {
 
     env->flag = 0;
     env->comm = NULL;
-    env->env_var = NULL;
     env->comm_args = NULL;
     env->env_var = (char **) malloc(size * sizeof (char *));
-    for (int j = 0; environ[j] != NULL; j++)
+    for (int j = 0; j < size -1; j++)
         env->env_var[i++] = mx_strdup(environ[j]);
     env->env_var[i] = NULL;
     return env;
@@ -50,10 +49,15 @@ static int check_flag(char **args, int i, t_env *env) {//
 
 static void create_command(t_env *env, char *arg) {
     int y = 0;
+    char *temp = NULL;
 
     for (; env->env_var[y]!= NULL; y++) {
-        if (strstr(env->env_var[y], "PATH=") != NULL)
+        temp = mx_strdup(env->env_var[y]);
+        if (strstr(temp, "PATH=") != NULL) {
+            mx_strdel(&temp);
             break;
+        }
+        mx_strdel(&temp);
     }
     if (env->env_var[y] == NULL)
         env->comm = mx_coomand_in_path(arg, MX_PATH());

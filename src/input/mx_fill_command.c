@@ -23,8 +23,11 @@ static void case_backspace(t_input *input, t_ush *ush) {
 static void one_line_input(t_input *input, t_ush *ush){
     if (input->coursor_position != input->len)
         mx_insert_char(input, input->input_ch, input->coursor_position);
-    else if (input->command != NULL)
+    else if (input->command != NULL) {
+        input->command = realloc(input->command, input->len + 2);
         input->command[input->len] = (char) input->input_ch;
+        input->command[input->len + 1] = '\0';
+    }
     else {
         input->command = mx_strnew(1000);//?
         input->command[input->len] = (char) input->input_ch;
@@ -44,7 +47,7 @@ static void one_line_input(t_input *input, t_ush *ush){
 
 static void case_default(t_input *input, t_ush *ush) {
     if (input->len + 8 > input->term_width) {
-    mx_printerr("\nush: input string is too long");
+        mx_printerr("\nush: input string is too long");
         input->term_width = 0;
     }
     else {
@@ -62,6 +65,8 @@ char *mx_fill_command(t_input *input, t_ush *ush) {
             break;
         case MX_ENTER:
             ret_str = mx_strtrim(input->command);
+            break;
+        case MX_TAB:
             break;
         default:
             case_default(input, ush);

@@ -23,7 +23,7 @@ char *mx_replace_substr(const char *str, const char *sub,
 
     if ((!str) || (!sub) || (!replace))
         return NULL;
-    get_all_lengths(&len_s, &len_r, (char *)sub, (char *)replace);
+    get_all_lengths(&len_s, &len_r, (char*)sub, (char*)replace);
     buf1 = mx_strnew(mx_strlen(s) + (len_r - len_s) * mx_count_substr(s, sub));
     buf2 = buf1;
     while (*s) {

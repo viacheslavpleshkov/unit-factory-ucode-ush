@@ -1,7 +1,7 @@
 #include "ush.h"
 
 int mx_env(char **args, t_ush *ush) {
-    t_env *env = mx_parse_env_args(args);
+    t_env *env = mx_parse_env_args(args, ush);
     char **env_args = NULL;
 
     if (env != NULL) {

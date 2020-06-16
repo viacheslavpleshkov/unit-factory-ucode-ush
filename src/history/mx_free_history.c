@@ -12,9 +12,30 @@ static t_dbl_list *deletelem(t_dbl_list *lst) {
     return(prev);
 }
 
-void mx_free_history(t_dbl_list *history) {
-    while (history->next != NULL)
-        history = history->next;
-    while (history != NULL)
-        history = deletelem(history);
+static void free_pids(t_pid *pids) {
+    t_pid *temp = NULL;
+
+    if (pids != NULL) {
+        while (pids->prev != NULL) {
+            temp = pids;
+            pids = pids->prev;
+            mx_strdel(&temp->str);
+            free(temp);
+        }
+        mx_strdel(&pids->str);
+        free(pids);
+    }
+}
+
+void mx_free_ush(t_ush *ush) {
+    if (ush != NULL) {
+        while (ush->history->next != NULL)
+            ush->history = ush->history->next;
+        while (ush->history != NULL)
+            ush->history = deletelem(ush->history);
+        mx_strdel(&ush->ush_path);
+        mx_strdel(&ush->pwd_l);
+        free_pids(ush->pids);
+        free(ush);
+    }
 }

@@ -20,7 +20,6 @@ SRC = $(addprefix $(SRC_DIR)/,\
 	builds/mx_exit.c \
 	builds/mx_echo.c \
 	builds/mx_which.c \
-	builds/mx_ush.c\
 	builds/mx_check_symlink.c\
 	builds/mx_find_flag.c\
 	builds/mx_file_exist.c\
@@ -78,7 +77,6 @@ OBJ = \
     mx_exit.o \
     mx_echo.o \
     mx_which.o \
-    mx_ush.o \
     mx_check_symlink.o\
     mx_find_flag.o\
     mx_parse_echo.o\

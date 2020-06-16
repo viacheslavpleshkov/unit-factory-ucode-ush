@@ -15,13 +15,24 @@ static void case_and_status_1(t_queue **queue, int i) {
         mx_pop_front_queue(&queue[i]);
     }
 }
+static bool check_is_str(char *data) {
+    char *temp = mx_strtrim(data);
+    bool status = false;
+
+    if (mx_strlen(temp) != 0)
+        status = true;
+    mx_strdel(&temp);
+    return status;
+}
+
 int mx_push_execute_queue(t_queue **queue, t_ush *ush) {
     int status = 0;
 
     for (int i = 0; queue[i] != NULL; i++) {
         while (queue[i] != NULL) {
             mx_com_sub(&queue[i]->data, ush);
-            status = mx_execute(ush, queue[i]->data, 0, NULL);
+            if (check_is_str(queue[i]->data) == true)
+                status = mx_execute(ush, queue[i]->data, 0, NULL);
             if (ush->exit_status != -1) {
                 mx_pop_front_queue(&queue[i]);
                 return status;

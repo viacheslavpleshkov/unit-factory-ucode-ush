@@ -7,7 +7,7 @@ static int par_exec_command(char **input, t_ush *ush, pid_t pid) {
 
     ush->curr_pid = pid;
     if (command == 1)
-        ret_val = mx_cd(input);
+        ret_val = mx_cd(input, ush);
     else if (command == 5)
         ret_val = mx_export(input);
     else if (command == 6)

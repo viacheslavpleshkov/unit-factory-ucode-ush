@@ -34,6 +34,7 @@ t_ush* mx_create_ush(char **argv) {
     ush->str_input = NULL;
     ush->ush_path = find_ush_path(argv);
     ush->history = lst_create();
+    ush->pwd_l = MX_PWD();
     return ush;
 }
 void mx_set_shl(void) {
@@ -42,19 +43,19 @@ void mx_set_shl(void) {
     extern char **environ;
     char cwd[PATH_MAX];
 
-    if (getenv("PWD") == NULL) {
-        if (getcwd(cwd, sizeof(cwd)) != NULL)
-            setenv("PWD", cwd, 1);
-    }
-    if (getenv("PATH") == NULL) {
+    if (getenv("HOME") == NULL)
+        setenv("HOME", MX_HOME(), 1);
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+        setenv("PWD", cwd, 1);
+    if (getenv("OLDPWD") == NULL)
+        setenv("OLDPWD", MX_PWD(), 1);
+    if (getenv("PATH") == NULL)
         setenv("PATH", MX_PATH(), 1);
-    }
     if (getenv("SHLVL") == NULL)
         setenv("SHLVL", "1", 1);
     else
         setenv("SHLVL", shlvl, 1);
-    if (getenv("_") == NULL)
-        setenv("_", "/usr/bin/env", 1);
+    setenv("_", "/usr/bin/env", 1);
     mx_strdel(&shlvl);
     mx_strdel(&shlv);
 }

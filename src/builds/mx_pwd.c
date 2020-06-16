@@ -32,13 +32,18 @@ static void parse_pwd(char **args, int *flag) {
 }
 
 
-int mx_pwd(char **args) {
+int mx_pwd(char **args, t_ush *ush) {
     int flag = 0;
-    char *position = MX_PWD();
+    char *position = NULL;
     int is_link = 0;
 
     parse_pwd(args, &flag);
-    is_link = mx_check_symlink(&position, flag, 2);
+    if (flag != 2)
+        position = mx_strdup(ush->pwd_l);
+    else {
+        position = MX_PWD();
+        is_link = mx_check_symlink(&position, flag, 2);
+    }
     if (flag != 3) {
         mx_printstr(position);
         mx_printchar('\n');

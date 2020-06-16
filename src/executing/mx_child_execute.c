@@ -31,24 +31,27 @@ static void child_free(char *command_p, int *fd, int ret_val) {
     mx_strdel(&command_p);
 }
 
-void mx_child_execute(int *ret, char **input, t_redirect *red, t_ush *ush) {
-    char *command_p = mx_coomand_in_path(input[0], getenv("PATH"));
-    int command = mx_is_builtin(command_p);
+void mx_child_execute(int *ret, char **inp, t_redirect *red, t_ush *ush) {
+    char *com_p = mx_coomand_in_path(inp[0], getenv("PATH"));
+    int command = mx_is_builtin(com_p);
 
     mx_child_redirect(red);
     if (command == 2)
-        *ret = mx_pwd(input);
+        *ret = mx_pwd(inp, ush);
     else if (command == 3)
-        *ret = mx_env(input, ush);
-    else if (command == 4)
-        *ret = mx_ush(input, ush->ush_path);
+        *ret = mx_env(inp, ush);
     else if (command == 8)
-        *ret = mx_which(input);
+        *ret = mx_which(inp);
     else if (command == 9)
-        *ret = mx_echo(input);
-    else if (command == 0)
-        child_not_builtin(ret, input, command_p);
-    child_free(command_p, red->fd_return, *ret);
+        *ret = mx_echo(inp);
+    else if (command == 0 || command == 4) {
+        if (mx_strcmp(com_p, "ush") == 0 || mx_strcmp(com_p, "./ush") == 0) {
+            mx_strdel(&inp[0]);
+            inp[0] = mx_strdup(ush->ush_path);
+        }
+        child_not_builtin(ret, inp, com_p);
+    }
+    child_free(com_p, red->fd_return, *ret);
     exit(0);
 }
 
